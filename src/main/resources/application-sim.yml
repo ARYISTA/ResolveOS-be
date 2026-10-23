@@ -1,0 +1,5 @@
+# ─── Sim profile — simulated engine (placeholder) ────────────────────────────
+spring:
+  config:
+    activate:
+      on-profile: sim

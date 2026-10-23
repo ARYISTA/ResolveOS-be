@@ -1,0 +1,5 @@
+# ─── Demo profile — seed data, reset, demo-login (placeholder) ───────────────
+spring:
+  config:
+    activate:
+      on-profile: demo

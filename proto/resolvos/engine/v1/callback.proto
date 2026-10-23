@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package resolvos.engine.v1;
+
+option java_multiple_files = true;
+option java_package = "com.resolvos.engine.grpc.v1";
+option java_outer_classname = "CallbackProto";
+
+import "resolvos/engine/v1/engine.proto";
+
+// BackendCallback is hosted by Spring, called by Python
+service BackendCallback {
+  rpc GetCaseContext(GetCaseContextRequest) returns (GetCaseContextResponse);
+  rpc ValidateCase(ValidateCaseRequest) returns (ValidateCaseResponse);
+  rpc SearchPolicyChunks(SearchPolicyChunksRequest) returns (SearchPolicyChunksResponse);
+  rpc EnforceDecision(EnforceDecisionRequest) returns (EnforceDecisionResponse);
+  rpc ExecuteRefund(ExecuteRefundRequest) returns (ExecuteRefundResponse);
+}
+
+message GetCaseContextRequest {
+  string tenant_id = 1;
+  string case_id = 2;
+  string trace_id = 3;
+}
+
+message GetCaseContextResponse {
+  string customer_id = 1;
+  string customer_name = 2;
+  string customer_tier = 3;
+  int32 customer_dispute_count = 4;
+  string transaction_id = 5;
+  string transaction_amount = 6;
+  string transaction_status = 7;
+  string merchant = 8;
+  string occurred_at = 9;
+}
+
+message ValidateCaseRequest {
+  string tenant_id = 1;
+  string case_id = 2;
+  string requested_amount = 3;
+  string transaction_id = 4;
+  string customer_id = 5;
+}
+
+message ValidationCheck {
+  string rule = 1;
+  bool passed = 2;
+  string reason = 3;
+}
+
+message ValidateCaseResponse {
+  bool valid = 1;
+  repeated ValidationCheck checks = 2;
+  string message = 3;
+}
+
+message SearchPolicyChunksRequest {
+  string tenant_id = 1;
+  string query_text = 2;
+  int32 top_k = 3;
+}
+
+message SearchPolicyChunksResponse {
+  repeated PolicyReference chunks = 1;
+}
+
+message EnforceDecisionRequest {
+  string tenant_id = 1;
+  string case_id = 2;
+  string decision = 3;
+  string recommended_amount = 4;
+  double confidence = 5;
+  string risk_level = 6;
+}
+
+message EnforcementRuleCheck {
+  string rule = 1;
+  bool passed = 2;
+  string reason = 3;
+}
+
+message EnforceDecisionResponse {
+  string verdict = 1; // ALLOW | DENY | ESCALATE
+  repeated EnforcementRuleCheck checks = 2;
+  string reason = 3;
+}
+
+message ExecuteRefundRequest {
+  string tenant_id = 1;
+  string case_id = 2;
+  string amount = 3;
+  string idempotency_key = 4;
+}
+
+message ExecuteRefundResponse {
+  string refund_id = 1;
+  string status = 2; // SUCCESS | FAILED
+  string gateway_ref = 3;
+  string error = 4;
+}

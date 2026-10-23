@@ -1,0 +1,16 @@
+# ─── Dev profile — local development defaults ────────────────────────────────
+# Active by default for local runs: spring.profiles.active=dev
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  flyway:
+    # Dev: allow migrations to run even if checksums differ (local hacking)
+    out-of-order: false
+
+logging:
+  level:
+    com.resolvos: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE

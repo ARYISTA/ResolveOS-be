@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package resolvos.engine.v1;
+
+option java_multiple_files = true;
+option java_package = "com.resolvos.engine.grpc.v1";
+option java_outer_classname = "EngineProto";
+
+// ResolutionEngine is hosted by the Python engine, called by Spring
+service ResolutionEngine {
+  rpc Resolve(ResolveCaseRequest) returns (stream EngineEvent);
+  rpc Resume(ResumeCaseRequest) returns (stream EngineEvent);
+}
+
+message ResolveCaseRequest {
+  string tenant_id = 1;
+  string case_id = 2;
+  string customer_id = 3;
+  string transaction_id = 4;
+  string ticket_text = 5;
+  string requested_amount = 6;
+  string trace_id = 7;
+}
+
+message ResumeCaseRequest {
+  string case_id = 1;
+  string trace_id = 2;
+  string reviewer = 3;
+  string decision = 4;
+  string approved_amount = 5;
+  string comment = 6;
+}
+
+message EngineEvent {
+  string case_id = 1;
+  int64 seq = 2;
+  string trace_id = 3;
+  oneof event {
+    NodeStartedEvent node_started = 4;
+    NodeCompletedEvent node_completed = 5;
+    NodeFailedEvent node_failed = 6;
+    HitlRequiredEvent hitl_required = 7;
+    FinalDecisionEvent final_decision = 8;
+  }
+}
+
+message NodeStartedEvent {
+  string node = 1;
+  string ts = 2;
+}
+
+message NodeCompletedEvent {
+  string node = 1;
+  int64 duration_ms = 2;
+  string output_json = 3;
+}
+
+message NodeFailedEvent {
+  string node = 1;
+  string error = 2;
+}
+
+message HitlRequiredEvent {
+  string reason = 1;
+  string risk_level = 2;
+}
+
+message FinalDecisionEvent {
+  string decision = 1;
+  string recommended_action = 2;
+  string recommended_amount = 3;
+  double confidence = 4;
+  string risk_level = 5;
+  repeated PolicyReference policy_references = 6;
+  bool requires_human_review = 7;
+  string reasoning_summary = 8;
+  string trace_id = 9;
+  ModelConfig model_config = 10;
+}
+
+message PolicyReference {
+  string policy_id = 1;
+  int32 version = 2;
+  string document_name = 3;
+  string section = 4;
+  int32 page_number = 5;
+  string chunk_id = 6;
+  string excerpt = 7;
+  double similarity_score = 8;
+}
+
+message ModelConfig {
+  string provider = 1;
+  string model = 2;
+  string version = 3;
+  string date = 4;
+}

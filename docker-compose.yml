@@ -1,0 +1,28 @@
+﻿# Docker Compose for ResolvOS local development
+# PostgreSQL 16 with pgvector extension
+# Credentials come from .env (git-ignored); commit only .env.example
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: resolvos-postgres
+    env_file: .env
+    environment:
+      POSTGRES_DB: resolvos
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d resolvos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    name: resolvos_postgres_data
